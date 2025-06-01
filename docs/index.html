@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bug Bounty Shodan Dorking Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-green-400 mb-6 text-center">
+      🕵️ Bug Bounty Shodan Dorking Tool
+    </h1>
+
+    <!-- Target Input -->
+    <label class="block mb-2 font-semibold text-gray-300">🎯 Target Domain / Keyword</label>
+    <input id="targetInput" type="text" placeholder="e.g. target.com or Tesla Inc"
+      class="w-full p-3 rounded-lg text-black mb-6" />
+
+    <!-- Dork Type Dropdown -->
+    <label for="dorkSelect" class="block mb-2 font-semibold text-gray-300">🧠 Dork Type (Multi-Select)</label>
+    <select id="dorkSelect" class="w-full p-3 rounded-lg text-black mb-6 h-60" multiple>
+      <optgroup label="🔐 SSL Certificates">
+        <option value="ssl:$">ssl:"$"</option>
+        <option value="ssl.cert.subject.cn:$">ssl.cert.subject.cn:"$"</option>
+        <option value="ssl.cert.issuer.cn:$">ssl.cert.issuer.cn:"$"</option>
+        <option value="ssl.subject:$">ssl.subject:"$"</option>
+      </optgroup>
+      <optgroup label="🌐 Web Content">
+        <option value="http.title:$">http.title:"$"</option>
+        <option value="http.html:$">http.html:"$"</option>
+        <option value="http.headers.server:$">http.headers.server:"$"</option>
+        <option value="http.headers.set-cookie:$">http.headers.set-cookie:"$"</option>
+        <option value="http.headers.x-powered-by:$">http.headers.x-powered-by:"$"</option>
+      </optgroup>
+      <optgroup label="🌍 Domain & Host">
+        <option value="hostname:$">hostname:"$"</option>
+        <option value="domain:$">domain:"$"</option>
+        <option value="org:$">org:"$"</option>
+        <option value="asn:$">asn:"$"</option>
+        <option value="net:$">net:"$"</option>
+      </optgroup>
+      <optgroup label="🛡️ Panels & Logins">
+        <option value="http.title:login">http.title:"login"</option>
+        <option value="http.favicon.hash:-247388890">favicon hash: Jenkins</option>
+        <option value="http.favicon.hash:-158984287">favicon hash: phpMyAdmin</option>
+        <option value="product:fortinet">product: Fortinet</option>
+      </optgroup>
+      <optgroup label="💥 Vulnerable Versions">
+        <option value="product:Apache version:2.4.49">Apache 2.4.49</option>
+        <option value="product:Exim version:4.87">Exim 4.87</option>
+        <option value="product:OpenSSH version:7.2p2">OpenSSH 7.2p2</option>
+        <option value="product:Microsoft-IIS version:7.5">IIS 7.5</option>
+      </optgroup>
+      <optgroup label="🧪 Services & Ports">
+        <option value="port:21 anonymous">port 21 anonymous</option>
+        <option value="port:22 OpenSSH">port 22 OpenSSH</option>
+        <option value="port:80 Apache">port 80 Apache</option>
+        <option value="port:443 ssl">port 443 ssl</option>
+      </optgroup>
+      <optgroup label="🔊 Public Dev Tools">
+        <option value="product:Jenkins">Jenkins</option>
+        <option value="product:Kibana">Kibana</option>
+        <option value="product:Grafana">Grafana</option>
+        <option value="product:SonarQube">SonarQube</option>
+        <option value="product:GitLab">GitLab</option>
+      </optgroup>
+    </select>
+
+    <!-- Search Button -->
+    <button onclick="searchShodan()"
+      class="bg-green-600 hover:bg-green-700 p-3 w-full rounded-lg font-bold">
+      🔎 Search All Dorks on Shodan
+    </button>
+
+    <!-- Preview Section -->
+    <div id="preview" class="mt-6 p-4 bg-gray-800 rounded-lg hidden">
+      <h2 class="text-xl font-semibold text-blue-300 mb-2">🔗 Preview Links:</h2>
+      <ul id="linkList" class="list-disc list-inside space-y-2"></ul>
+    </div>
+
+    <!-- Tip Section -->
+    <div class="text-sm text-gray-400 mt-6 text-center">
+      Make sure you're logged in to <a class="underline text-blue-400" href="https://www.shodan.io" target="_blank">shodan.io</a><br>
+      Use <kbd class="bg-gray-700 px-1">Ctrl</kbd>/<kbd class="bg-gray-700 px-1">Cmd</kbd> + Click to open multiple links
+    </div>
+  </div>
+
+  <script>
+    function searchShodan() {
+      const target = document.getElementById('targetInput').value.trim();
+      const dorks = Array.from(document.getElementById('dorkSelect').selectedOptions).map(opt => opt.value);
+
+      if (dorks.length === 0) {
+        alert("Please select at least one dork.");
+        return;
+      }
+
+      const results = dorks.map(dork => {
+        const final = dork.includes('$') ? dork.replaceAll('$', target) : dork;
+        return `https://www.shodan.io/search?query=${encodeURIComponent(final)}`;
+      });
+
+      const preview = document.getElementById('preview');
+      const linkList = document.getElementById('linkList');
+      linkList.innerHTML = '';
+      results.forEach(url => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = "_blank";
+        a.className = "text-green-400 hover:underline";
+        a.innerText = url;
+        li.appendChild(a);
+        linkList.appendChild(li);
+      });
+      preview.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
